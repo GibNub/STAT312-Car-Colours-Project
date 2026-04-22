@@ -12,3 +12,14 @@ two_way <- registered.colour |>
 # Total count of all vehicles
 sum(two_way$UC_Vehicles)
 sum(two_way$NZ_Vehicles)
+
+
+# Convert data to longformat resulting in colour,vehicle_source,count
+long_format <- two_way %>%
+  select(Colour, NZ_Vehicles, UC_Vehicles) %>%
+  pivot_longer(cols=c(NZ_Vehicles, UC_Vehicles), names_to='vehicle_source', values_to='count')
+
+# Convert into contingency table where row is vehicle source and columns are colours and values are counts
+cont_table <- xtabs(count ~ vehicle_source + Colour, data=long_format)
+chi_result <- chisq.test(cont_table)
+chi_result
