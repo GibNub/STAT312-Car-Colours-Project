@@ -23,3 +23,25 @@ long_format <- two_way %>%
 cont_table <- xtabs(count ~ vehicle_source + Colour, data=long_format)
 chi_result <- chisq.test(cont_table)
 chi_result
+
+
+
+
+# Convert percentage data to long format for plotting
+plot_data <- two_way |>
+  select(Colour, UC_Pct, NZ_Pct) |>
+  pivot_longer(cols = c(UC_Pct, NZ_Pct),
+               names_to = "Source",
+               values_to = "Percentage") |>
+  mutate(Source = recode(Source,
+                         "UC_Pct" = "UC Vehicles",
+                         "NZ_Pct" = "NZ National"))
+
+# Grouped bar chart comparing distributions by percentage
+ggplot(plot_data, aes(x = Colour, y = Percentage, fill = Source)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Vehicle Colour Distribution: UC Carparks vs NZ National",
+       x = "Colour",
+       y = "Percentage (%)",
+       fill = "Source") +
+  theme_minimal()
