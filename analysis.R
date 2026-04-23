@@ -19,8 +19,20 @@ long_format <- two_way %>%
   select(Colour, NZ_Vehicles, UC_Vehicles) %>%
   pivot_longer(cols=c(NZ_Vehicles, UC_Vehicles), names_to='vehicle_source', values_to='count')
 
+# Merge colours that are exceedingly rare with another similar colour
+# Allows data to fit assumption of chisq test
+long_format_merged <- long_format %>%
+  mutate(Colour = case_when(
+    Colour %in% c('Brown','Cream') ~ 'Brown/Cream',
+    Colour %in% c('Yellow','Gold') ~ 'Yellow/Gold',
+    Colour %in% c('Pink','Purple') ~ 'Pink/Purple',
+    TRUE ~ Colour
+  )) %>%
+  group_by(Colour, vehicle_source) %>%
+  summarise(count = sum(count))
+
 # Convert into contingency table where row is vehicle source and columns are colours and values are counts
-cont_table <- xtabs(count ~ vehicle_source + Colour, data=long_format)
+cont_table <- xtabs(count ~ vehicle_source + Colour, data=long_format_merged)
 chi_result <- chisq.test(cont_table)
 chi_result
 
@@ -45,3 +57,4 @@ ggplot(plot_data, aes(x = Colour, y = Percentage, fill = Source)) +
        y = "Percentage (%)",
        fill = "Source") +
   theme_minimal()
+
