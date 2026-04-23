@@ -37,8 +37,6 @@ chi_result <- chisq.test(cont_table)
 chi_result
 
 
-
-
 # Convert percentage data to long format for plotting
 plot_data <- two_way |>
   select(Colour, UC_Pct, NZ_Pct) |>
@@ -58,3 +56,38 @@ ggplot(plot_data, aes(x = Colour, y = Percentage, fill = Source)) +
        fill = "Source") +
   theme_minimal()
 
+
+# Manual colourmap for scale_fill_manual
+colour_map <- c(
+  "Black"  = "grey20",
+  "Blue"   = "steelblue3",
+  "Brown"  = "sienna3",
+  "Cream"  = "cornsilk3",
+  "Gold"   = "goldenrod2",
+  "Green"  = "seagreen3",
+  "Grey"   = "grey60",
+  "Orange" = "darkorange2",
+  "Pink"   = "lightpink3",
+  "Purple" = "mediumpurple3",
+  "Red"    = "indianred3",
+  "Silver" = "grey80",
+  "White"  = "grey95",
+  "Yellow" = "goldenrod1"
+)
+
+
+# Create dataframe to only include carpark, colour, and number of cars from UC parking spots
+carpark_grouped <- carpark.all %>%
+  select(c(Colour, Carpark)) %>%
+  group_by(Colour, Carpark) %>%
+  summarise(count = n())
+#  %>% filter(Carpark %in% c('Clyde', 'Zoology', 'UCSA', 'Dovedale')) # Keep largest carparks
+
+
+# Bargraph showing colour distributions between carparks
+ggplot(carpark_grouped, aes(x=Carpark, y=count, fill=Colour)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  theme_minimal() + 
+  labs(title = 'Distribution of car colours between UC carparks',
+       y = 'Number of cars') + 
+  scale_fill_manual(values = colour_map)
