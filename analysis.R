@@ -24,7 +24,7 @@ long_format <- two_way %>%
 long_format_merged <- long_format %>%
   mutate(Colour = case_when(
     Colour %in% c('Brown','Cream') ~ 'Brown/Cream',
-    Colour %in% c('Yellow','Gold') ~ 'Yellow/Gold',
+    # Colour %in% c('Yellow','Gold') ~ 'Yellow/Gold', # Meets assumption already
     Colour %in% c('Pink','Purple') ~ 'Pink/Purple',
     TRUE ~ Colour
   )) %>%
@@ -91,3 +91,6 @@ ggplot(carpark_grouped, aes(x=Carpark, y=count, fill=Colour)) +
   labs(title = 'Distribution of car colours between UC carparks',
        y = 'Number of cars') + 
   scale_fill_manual(values = colour_map)
+
+
+
