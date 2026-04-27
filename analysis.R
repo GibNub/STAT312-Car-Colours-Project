@@ -38,7 +38,7 @@ chi_result
 
 
 # Convert percentage data to long format for plotting
-plot_data <- two_way |>
+two_way_long <- two_way |>
   select(Colour, UC_Pct, NZ_Pct) |>
   pivot_longer(cols = c(UC_Pct, NZ_Pct),
                names_to = "Source",
@@ -48,7 +48,7 @@ plot_data <- two_way |>
                          "NZ_Pct" = "NZ National"))
 
 # Grouped bar chart comparing distributions by percentage
-ggplot(plot_data, aes(x = Colour, y = Percentage, fill = Source)) +
+ggplot(two_way_long, aes(x = Colour, y = Percentage, fill = Source)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(title = "Vehicle Colour Distribution: UC Carparks vs NZ National",
        x = "Colour",
