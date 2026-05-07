@@ -92,5 +92,23 @@ ggplot(carpark_grouped, aes(x=Carpark, y=count, fill=Colour)) +
        y = 'Number of cars') + 
   scale_fill_manual(values = colour_map)
 
+# Standardised residuals for UC
+results_std_residuals <- chi_result$stdres |>
+  as_tibble() |>
+  rename(Colour = Colour,
+         Source = vehicle_source,
+         Std_Residual = n) |>
+  filter(Source == "UC_Vehicles")
+
+
+ggplot(results_std_residuals, aes(x = reorder(Colour, Std_Residual), y = Std_Residual)) +
+  geom_col(aes(fill = Std_Residual > 2 | Std_Residual < -2)) +
+  coord_flip() +
+  scale_fill_manual(values = c("gray", "red"), guide = "none") +
+  labs(title = "Standardised Residuals for UC Vehicles by Colour",
+       x = "Vehicle Colour",
+       y = "Standardised Residual",
+       subtitle = "Red Bars (+-2) indicate significant deviation from NZ national distribution") +
+  theme_minimal()
 
 
