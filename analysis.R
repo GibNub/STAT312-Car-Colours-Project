@@ -19,24 +19,6 @@ long_format <- two_way %>%
   select(Colour, NZ_Vehicles, UC_Vehicles) %>%
   pivot_longer(cols=c(NZ_Vehicles, UC_Vehicles), names_to='vehicle_source', values_to='count')
 
-# Merge colours that are exceedingly rare with another similar colour
-# Allows data to fit assumption of chisq test
-long_format_merged <- long_format %>%
-  mutate(Colour = case_when(
-    Colour %in% c('Brown','Cream') ~ 'Brown/Cream',
-    # Colour %in% c('Yellow','Gold') ~ 'Yellow/Gold', # Meets assumption already
-    Colour %in% c('Pink','Purple') ~ 'Pink/Purple',
-    TRUE ~ Colour
-  )) %>%
-  group_by(Colour, vehicle_source) %>%
-  summarise(count = sum(count))
-
-# Convert into contingency table where row is vehicle source and columns are colours and values are counts
-cont_table <- xtabs(count ~ vehicle_source + Colour, data=long_format_merged)
-chi_result <- chisq.test(cont_table)
-chi_result
-
-
 # Convert percentage data to long format for plotting
 two_way_long <- two_way |>
   select(Colour, UC_Pct, NZ_Pct) |>
@@ -92,6 +74,48 @@ ggplot(carpark_grouped, aes(x=Carpark, y=count, fill=Colour)) +
        y = 'Number of cars') + 
   scale_fill_manual(values = colour_map)
 
+
+## Chisq Testing
+# Use raw data
+cont_table_unmerged = xtabs(count ~ vehicle_source + Colour, data=long_format)
+chi_unmerged = chisq.test(cont_table_unmerged)
+chi_unmerged$expected
+exp_counts_unmerged = stack(chi_unmerged$expected[2,])
+
+
+ggplot(exp_counts_unmerged, aes(x=ind, y=values)) + 
+  geom_col(aes(fill = values > 5)) + 
+  geom_abline(intercept = 5, slope = 0, linetype=2, lwd=1) +
+  labs(
+    title = 'Expected counts of each colours for UC vehicles',
+    subtitle = 'Dashed line shows minimum threshold',
+    x = 'Colour',
+    y = 'Expected count'
+  ) + 
+  theme_minimal() + 
+  scale_fill_manual(values = c('indianred3', 'steelblue'))
+
+
+# Merge colours that are exceedingly rare with another similar colour
+# Allows data to fit assumption of chisq test
+long_format_merged <- long_format %>%
+  mutate(Colour = case_when(
+    Colour %in% c('Brown','Cream') ~ 'Brown/Cream',
+    # Colour %in% c('Yellow','Gold') ~ 'Yellow/Gold', # Meets assumption already
+    Colour %in% c('Pink','Purple') ~ 'Pink/Purple',
+    TRUE ~ Colour
+  )) %>%
+  group_by(Colour, vehicle_source) %>%
+  summarise(count = sum(count))
+
+
+# Convert into contingency table where row is vehicle source and columns are colours and values are counts
+cont_table <- xtabs(count ~ vehicle_source + Colour, data=long_format_merged)
+chi_result <- chisq.test(cont_table)
+chi_result
+
+
+## Plotting standardised residuals for UC Vehicles
 # Standardised residuals for UC
 results_std_residuals <- chi_result$stdres |>
   as_tibble() |>
@@ -110,5 +134,6 @@ ggplot(results_std_residuals, aes(x = reorder(Colour, Std_Residual), y = Std_Res
        y = "Standardised Residual",
        subtitle = "Red Bars (+-2) indicate significant deviation from NZ national distribution") +
   theme_minimal()
+
 
 
