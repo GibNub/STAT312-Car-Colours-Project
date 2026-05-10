@@ -136,4 +136,19 @@ ggplot(results_std_residuals, aes(x = reorder(Colour, Std_Residual), y = Std_Res
   theme_minimal()
 
 
+# Show summary plot using merged colours
+merged_percent <- long_format_merged %>%
+  group_by(vehicle_source) %>%
+  mutate(percent = count / sum(count) * 100)
+
+# Grouped bar chart comparing distributions by percentage for merged data
+ggplot(merged_percent, aes(x = Colour, y = percent, fill = vehicle_source)) +
+  geom_bar(stat = "identity", position = "dodge", aes(weight = )) +
+  labs(title = "Vehicle Colour Distribution: UC Carparks vs NZ National",
+       subtitle = 'Colours with low expected counts are merged with another colour',
+       x = "Colour",
+       y = "Percentage (%)",
+       fill = "Source") +
+  theme_minimal()
+
 
