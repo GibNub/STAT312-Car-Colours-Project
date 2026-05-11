@@ -82,7 +82,7 @@ chi_unmerged = chisq.test(cont_table_unmerged)
 chi_unmerged$expected
 exp_counts_unmerged = stack(chi_unmerged$expected[2,])
 
-
+# Vertical bar plot of expected counts for each vehicle colour with threshold = 5
 ggplot(exp_counts_unmerged, aes(x=ind, y=values)) + 
   geom_col(aes(fill = values > 5)) + 
   geom_abline(intercept = 5, slope = 0, linetype=2, lwd=1) +
@@ -124,7 +124,7 @@ results_std_residuals <- chi_result$stdres |>
          Std_Residual = n) |>
   filter(Source == "UC_Vehicles")
 
-
+# Horizontal bar chart of standardised residuals for UC vehicles by colour
 ggplot(results_std_residuals, aes(x = reorder(Colour, Std_Residual), y = Std_Residual)) +
   geom_col(aes(fill = Std_Residual > 2 | Std_Residual < -2)) +
   coord_flip() +
